@@ -16,7 +16,7 @@ from nanohakase import *
 rpc = RPC("https://proxy.nanos.cc/proxy")
 
 #check current blockcount
-print(rpc.get_block_count().count)
+print(rpc.get_block_count()["count"])
 
 #get last 10 transactions
 print(rpc.get_account_history("nano_3346kkobb11qqpo17imgiybmwrgibr7yi34mwn5j6uywyke8f7fnfp94uyps", count=10)["history"])
