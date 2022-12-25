@@ -8,6 +8,13 @@ Nanohakase is a python library for the Nano cryptocurrency. It aims to be the si
 
 Nanohakase is on [pypi](https://pypi.org/project/nanohakase/).
 
+If you have trouble installing `nanohakase` because of the `ed25519-blake2b` dependency, try this:
+(Linux Debian/Ubuntu example)
+```
+sudo apt-get install python3-dev
+```
+or it's equivalent for your OS.
+
 # Quick Start
 
 First, start with a `RPC` class, for read only 
