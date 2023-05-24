@@ -1,9 +1,11 @@
 import requests
 
 class RPC:
-  def __init__(self, rpc_url: str, auth = False):
+  def __init__(self, rpc_url: str, auth = False, legacy = False):
     self.rpc_url = rpc_url
     self.auth = auth
+    #if legacy is true, use 'pending' instead of receivable
+    self.legacy = legacy
   #send rpc calls
   def call(self, payload):
     headers = {}
@@ -13,7 +15,6 @@ class RPC:
     resp = requests.post(self.rpc_url, json=payload, headers=headers)
     #40x or 50x error codes returned, then there is a failure
     if resp.status_code >= 400:
-      print(resp.text)
       raise Exception("Request failed with status code "+str(resp.status_code))
     resp = resp.json()
     if "error" in resp:
@@ -46,9 +47,12 @@ class RPC:
   def get_account_weight(self, account: str):
     return self.call({"action": "account_weight", "account": account})
   def get_receivable(self, account: str, count: int = 20, threshold = False):
+    action_name = "receivable"
+    if self.legacy:
+      action_name = "pending"
     if threshold:
-      return self.call({"action": "receivable", "account": account, "count": str(count), "threshold": str(threshold)})
+      return self.call({"action": action_name, "account": account, "count": str(count), "threshold": str(threshold)})
     else:
-      return self.call({"action": "receivable", "account": account, "count": str(count)})
+      return self.call({"action": action_name, "account": account, "count": str(count)})
   #todo: delegators, delegators_count, accounts_frontiers, account_block_count
   """Action RPC calls are provided by Wallet class in wallet.py, not here"""

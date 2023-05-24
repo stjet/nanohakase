@@ -3,13 +3,14 @@ from .util import *
 
 #todo: request work with work_generate
 class Wallet:
-  def __init__(self, rpc: RPC, seed = False, index: int = 0):
+  def __init__(self, rpc: RPC, seed = False, index: int = 0, try_work = False):
     self.rpc = rpc
     #if seed is False, automatically generate new seed
     if not seed:
       seed = self.generate_seed()
     self.seed = seed
     self.index = index
+    self.try_work = try_work
   @staticmethod
   def generate_seed():
     return bytes_to_hex(random_bytes(32))
@@ -23,7 +24,14 @@ class Wallet:
       "block": block
     }
     if "work" not in block:
-      payload["do_work"] = True
+      if self.try_work:
+        #if opening block, there is no previous, so use public key as hash instead
+        if block["previous"] == "0000000000000000000000000000000000000000000000000000000000000000":
+          block["work"] = gen_work(get_public_key_from_private_key(get_private_key_from_seed(self.seed, self.index)), subtype)
+        else:
+          block["work"] = gen_work(block["previous"], subtype)
+      else:
+        payload["do_work"] = True
     return self.rpc.call(payload)
   #actions
   def send(self, to: str, amount: str, work = False):
