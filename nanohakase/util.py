@@ -2,7 +2,7 @@ import os, math, random
 from hashlib import blake2b
 import ed25519_blake2b
 from decimal import Decimal, getcontext
-import nanopy
+from nanopy import work_generate, work_validate
 
 NANO_DECIMALS = 30
 #nano supply is 100.000.000+, so add 9 decimals
@@ -167,7 +167,7 @@ def gen_work(hash: str, block_subtype: str) -> str:
     else:
         raise ValueError("Invalid block subtype")
 
-    return nanopy.work_generate(hash, threshold)
+    return work_generate(hash, threshold)
 
 
 def verify_work(hash: str, work: str, block_subtype: str) -> bool:
@@ -178,5 +178,5 @@ def verify_work(hash: str, work: str, block_subtype: str) -> bool:
     else:
         raise ValueError("Invalid block subtype")
 
-    return nanopy.work_validate(hash, work, threshold)
+    return work_validate(hash, work, threshold)
 
