@@ -1,5 +1,7 @@
 # Nanohakase
 
+This fork replaced the default work generation with nanopy's C work generation, it's unknown if this is reliable or good.
+
 Nanohakase is a python library for the Nano cryptocurrency. It aims to be the simplest Nano library out there, and is a self fork of Bananopie (Nanopie was taken already).
 
 ## Installation
