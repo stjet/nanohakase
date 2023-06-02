@@ -7,13 +7,15 @@ class RPC:
     #if legacy is true, use 'pending' instead of receivable
     self.legacy = legacy
   #send rpc calls
-  def call(self, payload):
+  def call(self, payload, timeout=None):
     headers = {}
     #add auth header, if exists
     if self.auth:
-      headers['Authorization'] = self.auth
-    resp = requests.post(self.rpc_url, json=payload, headers=headers)
-    #40x or 50x error codes returned, then there is a failure
+        headers['Authorization'] = self.auth
+    try:
+        resp = requests.post(self.rpc_url, json=payload, headers=headers, timeout=timeout)
+    except requests.exceptions.RequestException as err:
+        raise Exception("Node is unreachable or request failed: "+str(err))
     if resp.status_code >= 400:
       raise Exception("Request failed with status code "+str(resp.status_code))
     resp = resp.json()
@@ -56,3 +58,14 @@ class RPC:
       return self.call({"action": action_name, "account": account, "count": str(count)})
   #todo: delegators, delegators_count, accounts_frontiers, account_block_count
   """Action RPC calls are provided by Wallet class in wallet.py, not here"""
+  
+  def ping(self):
+    try:
+        self.call({"action": "block_count"}, timeout=30)
+        return True
+    except requests.exceptions.Timeout:
+        print("Ping request to node timed out.")
+        return False
+    except Exception as e:
+        print(e)
+        return False
