@@ -36,6 +36,7 @@ class Wallet:
           else:
               payload["do_work"] = True
       return self.rpc.call(payload)
+
   #actions
   def send(self, to: str, amount: str, work = False):
     amount = whole_to_raw(amount)
