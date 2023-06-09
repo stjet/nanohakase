@@ -3,28 +3,40 @@ from .util import *
 
 #todo: request work with work_generate
 class Wallet:
-  def __init__(self, rpc: RPC, seed = False, index: int = 0):
+  def __init__(self, rpc: RPC, seed = False, index: int = 0, try_work = False):
     self.rpc = rpc
     #if seed is False, automatically generate new seed
     if not seed:
       seed = self.generate_seed()
     self.seed = seed
     self.index = index
+    self.try_work = try_work
   @staticmethod
   def generate_seed():
     return bytes_to_hex(random_bytes(32))
   def get_address(self):
     return get_address_from_public_key(get_public_key_from_private_key(get_private_key_from_seed(self.seed, self.index)))
   def send_process(self, block, subtype: str):
-    payload = {
-      "action": "process",
-      "subtype": subtype,
-      "json_block": "true",
-      "block": block
-    }
-    if "work" not in block:
-      payload["do_work"] = True
-    return self.rpc.call(payload)
+      payload = {
+          "action": "process",
+          "subtype": subtype,
+          "json_block": "true",
+          "block": block
+      }
+      if "work" not in block:
+          if self.try_work:
+              # if opening block, there is no previous, so use public key as hash instead
+              if block["previous"] == "0000000000000000000000000000000000000000000000000000000000000000":
+                  block["work"] = gen_work(get_public_key_from_private_key(get_private_key_from_seed(self.seed, self.index)), subtype)
+              else:
+                  block["work"] = gen_work(block["previous"], subtype)
+              # Check if the RPC server is reachable after the work generation.
+              if not self.rpc.ping():
+                  raise Exception("RPC server is not reachable after work generation. Transaction aborted. Nano")
+          else:
+              payload["do_work"] = True
+      return self.rpc.call(payload)
+
   #actions
   def send(self, to: str, amount: str, work = False):
     amount = whole_to_raw(amount)
@@ -134,4 +146,3 @@ class Wallet:
   def get_representative(self):
     return self.rpc.get_account_representative(self.get_address())
   def get_account_info(self):
-    return self.rpc.get_account_info(self.get_address())
