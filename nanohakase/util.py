@@ -120,5 +120,5 @@ def sign(private_key, hash):
 def whole_to_raw(whole: str):
   return int(Decimal(whole)*(10**NANO_DECIMALS))
 
-def raw_to_whole(raw):
-  return math.floor((raw*100)/(10**NANO_DECIMALS))/100
+def raw_to_whole(raw: int, precision: int = 2):
+  return math.floor((raw*10**precision)/(10**NANO_DECIMALS))/10**precision
