@@ -26,7 +26,7 @@ class Wallet:
       payload["do_work"] = True
     return self.rpc.call(payload)
   #actions
-  def send(self, to: str, amount: str, work = False):
+  def send(self, to: str, amount: str):
     amount = whole_to_raw(amount)
     address_sender = self.get_address()
     private_key_sender = get_private_key_from_seed(self.seed, self.index)
@@ -50,10 +50,10 @@ class Wallet:
     block_hash = hash_block(block)
     signature = sign(private_key_sender, block_hash)
     block["signature"] = signature
-    if work:
-      block["work"] = work
+    if self.rpc.rpc_url != "https://app.natrium.io/api":
+      block["work"] = self.rpc.work_generate(previous)["work"]
     return self.send_process(block, "send")
-  def receive_specific(self, hash: str, work=False):
+  def receive_specific(self, hash: str):
     #no need to check as opened, I think?
     #get block info of receiving
     block_info = self.rpc.get_block_info(hash)
@@ -88,15 +88,15 @@ class Wallet:
     block_hash = hash_block(block)
     signature = sign(private_key_receiver, block_hash)
     block["signature"] = signature
-    if work:
-      block["work"] = work
+    if self.rpc.rpc_url != "https://app.natrium.io/api":
+      block["work"] = self.rpc.work_generate(previous)["work"]
     return self.send_process(block, "receive")
   def receive_all(self):
     receivable_blocks = self.get_receivable()["blocks"]
     for block_hash in receivable_blocks:
       #receive them
       self.receive_specific(block_hash)
-  def change_rep(self, new_representative, work=False):
+  def change_rep(self, new_representative):
     address_self = self.get_address()
     private_key_self = get_private_key_from_seed(self.seed, self.index)
     #public_key_sender = get_public_key_from_private_key(get_private_key_from_seed(self.seed, self.index))
@@ -123,8 +123,8 @@ class Wallet:
     block_hash = hash_block(block)
     signature = sign(private_key_self, block_hash)
     block["signature"] = signature
-    if work:
-      block["work"] = work
+    if self.rpc.rpc_url != "https://app.natrium.io/api":
+      block["work"] = self.rpc.work_generate(previous)["work"]
     return self.send_process(block, "change")
   #double wrapped
   def get_balance(self):

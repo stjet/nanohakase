@@ -50,5 +50,7 @@ class RPC:
       return self.call({"action": "receivable", "account": account, "count": str(count), "threshold": str(threshold)})
     else:
       return self.call({"action": "receivable", "account": account, "count": str(count)})
+  def work_generate(self, work_base: str):
+    return self.call({"action": "work_generate", "hash": work_base})
   #todo: delegators, delegators_count, accounts_frontiers, account_block_count
   """Action RPC calls are provided by Wallet class in wallet.py, not here"""
