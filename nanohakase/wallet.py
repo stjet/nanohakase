@@ -26,7 +26,7 @@ class Wallet:
       payload["do_work"] = True
     return self.rpc.call(payload)
   #actions
-  def send(self, to: str, amount: str):
+  def send(self, to: str, amount: str, work=False):
     amount = whole_to_raw(amount)
     address_sender = self.get_address()
     private_key_sender = get_private_key_from_seed(self.seed, self.index)
@@ -50,10 +50,12 @@ class Wallet:
     block_hash = hash_block(block)
     signature = sign(private_key_sender, block_hash)
     block["signature"] = signature
-    if self.rpc.rpc_url != "https://app.natrium.io/api":
+    if work:
+      block["work"] = work
+    elif self.rpc.rpc_url != "https://app.natrium.io/api":
       block["work"] = self.rpc.work_generate(previous)["work"]
     return self.send_process(block, "send")
-  def receive_specific(self, hash: str):
+  def receive_specific(self, hash: str, work=False):
     #no need to check as opened, I think?
     #get block info of receiving
     block_info = self.rpc.get_block_info(hash)
@@ -88,7 +90,9 @@ class Wallet:
     block_hash = hash_block(block)
     signature = sign(private_key_receiver, block_hash)
     block["signature"] = signature
-    if self.rpc.rpc_url != "https://app.natrium.io/api":
+    if work:
+      block["work"] = work
+    elif self.rpc.rpc_url != "https://app.natrium.io/api":
       block["work"] = self.rpc.work_generate(previous)["work"]
     return self.send_process(block, "receive")
   def receive_all(self):
@@ -96,7 +100,7 @@ class Wallet:
     for block_hash in receivable_blocks:
       #receive them
       self.receive_specific(block_hash)
-  def change_rep(self, new_representative):
+  def change_rep(self, new_representative, work=False):
     address_self = self.get_address()
     private_key_self = get_private_key_from_seed(self.seed, self.index)
     #public_key_sender = get_public_key_from_private_key(get_private_key_from_seed(self.seed, self.index))
@@ -123,7 +127,9 @@ class Wallet:
     block_hash = hash_block(block)
     signature = sign(private_key_self, block_hash)
     block["signature"] = signature
-    if self.rpc.rpc_url != "https://app.natrium.io/api":
+    if work:
+      block["work"] = work
+    elif self.rpc.rpc_url != "https://app.natrium.io/api":
       block["work"] = self.rpc.work_generate(previous)["work"]
     return self.send_process(block, "change")
   #double wrapped
