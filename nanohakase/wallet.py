@@ -26,7 +26,7 @@ class Wallet:
       payload["do_work"] = True
     return self.rpc.call(payload)
   #actions
-  def send(self, to: str, amount: str, work = False):
+  def send(self, to: str, amount: str, work=False):
     amount = whole_to_raw(amount)
     address_sender = self.get_address()
     private_key_sender = get_private_key_from_seed(self.seed, self.index)
@@ -52,6 +52,8 @@ class Wallet:
     block["signature"] = signature
     if work:
       block["work"] = work
+    elif self.rpc.rpc_url != "https://app.natrium.io/api":
+      block["work"] = self.rpc.work_generate(previous)["work"]
     return self.send_process(block, "send")
   def receive_specific(self, hash: str, work=False):
     #no need to check as opened, I think?
@@ -90,6 +92,8 @@ class Wallet:
     block["signature"] = signature
     if work:
       block["work"] = work
+    elif self.rpc.rpc_url != "https://app.natrium.io/api":
+      block["work"] = self.rpc.work_generate(previous)["work"]
     return self.send_process(block, "receive")
   def receive_all(self):
     receivable_blocks = self.get_receivable()["blocks"]
@@ -125,6 +129,8 @@ class Wallet:
     block["signature"] = signature
     if work:
       block["work"] = work
+    elif self.rpc.rpc_url != "https://app.natrium.io/api":
+      block["work"] = self.rpc.work_generate(previous)["work"]
     return self.send_process(block, "change")
   #double wrapped
   def get_balance(self):
