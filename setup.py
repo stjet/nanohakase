@@ -7,7 +7,7 @@ setup(
     author_email="prussia@prussia.dev",
     packages=["nanohakase"],
     install_requires=["requests", "ed25519_blake2b"],
-    version="0.0.4",
+    version="0.0.5",
     license="MIT",
     description="A python library to simplify sending and receiving Nano. Also a RPC wrapper. Self fork of bananopie.",
     long_description=open("README.md").read(),
